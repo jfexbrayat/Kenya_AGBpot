@@ -220,7 +220,7 @@ if sys.argv[2] == 'new':
     X_train, X_test, y_train, y_test = train_test_split(X,y,random_state=26)
 
     param_grid = {"max_features": ['auto','sqrt','log2'],
-          "min_samples_leaf": np.arange(21,60,10),
+          "min_samples_leaf": np.arange(20,60,10),
           "n_estimators": np.arange(100,1001,100)}
 
     grid = RandomizedSearchCV(forest,param_distributions=param_grid,cv=5,verbose = True,n_iter = 50)
@@ -244,6 +244,7 @@ if sys.argv[2] == 'new':
     #now fit final forest on all dataset
     forest.fit(X,y)
 
+    #save the fitted algorithm to avoid refitting everytime
     joblib.dump(forest,path+'/../saved_algorithms/kenya_ODA_v2_AGBpot_%s_WC2_SOTWIS.pkl' % lvl,compress = 1)
 
 elif sys.argv[2] == 'load':
@@ -257,9 +258,7 @@ print forest.score(X,y)
 potmap = np.zeros(kenya.shape)-9999.
 potmap[slcpred] = forest.predict(X_pred)
 
-
-
-potmap[slc] = target.data[slc]
+potmap[slc] = y
 potmap[~slcpred] = -9999.
 potmap = np.ma.masked_equal(potmap,-9999.)
 
@@ -284,10 +283,11 @@ ax.set_ylim(0,ax.get_ylim()[1])
 figimp.show()
 #figimp.savefig('calval/importances_v2_%s_threshold_WorldClim2_subset.png' % lvl,bbox_inches='tight')
 
+#save a netcdf file if needed
 if sys.argv[3] =='savenc':
     import os
 
-    fname = 'Kenya_ODA_v2_PFB_%s_WorldClim2_GridSearch.nc' % lvl
+    fname = 'Kenya_ODA_v2_PFB_%s_WC2_SOTWIS_GridSearch.nc' % lvl
 
     if fname in os.listdir(path+'/../output/'):
         os.remove(path+'/../output/'+fname)
