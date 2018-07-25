@@ -62,16 +62,22 @@ for ff,fname in enumerate(wc2files):
             wc2mask = np.ones(dummy.shape,dtype='bool')
             wc2mask[dummy < -1.69e308] = False
 
+#load soil properties and get a mask
+sotwisfiles = glob.glob(path+'/KEN_SOTWIS/*tif');sotwisfiles.sort()
+soilmask = gdal.Open(sotwisfiles[0]).ReadAsArray()!=-9999.
+
 #define coordinates
 y,x = wc2mask.shape
 lon = np.arange(x)*geo[1]+geo[0]+geo[1]/2.
 lat = np.arange(y)*geo[-1]+geo[3]+geo[-1]/2.
 
-slcpred = kenya*wc2mask*(lc2015!=210)
+#select prediction zone
+slcpred = kenya*wc2mask*(lc2015!=210)*soilmask
 print '# total pixels', slcpred.sum()
 
-predict = np.zeros([slcpred.sum(),len(wc2subset)])
-for vv,varfile in enumerate(wc2subset):
+predfiles = wc2subset+sotwisfiles
+predict = np.zeros([slcpred.sum(),len(predfiles)])
+for vv,varfile in enumerate(predfiles):
     predict[:,vv] = gdal.Open(varfile).ReadAsArray()[slcpred]
 
 #create a pipeline to standardize and extract EOFs
@@ -86,43 +92,29 @@ for ii in range(corrmat.shape[0]):
     for jj in range(corrmat.shape[1]):
         corrmat[ii,jj] = pearsonr(predict[:,ii],X_pred[:,jj])[0]
 
+
+xlabs = []
+for i in range(1,20):
+    xlabs.append('BI%02i' % i)
+for fname in sotwisfiles:
+    xlabs.append(fname.split('/')[-1].split('.')[0])
 # plot \o/
 fig = plt.figure('PCA',figsize=(8,5));fig.clf()
-
-# start with the maps at top
-prj=ccrs.PlateCarree()
-axes_class = (GeoAxes,dict(map_projection=prj))
-
-grmap = AxesGrid(fig,211,nrows_ncols=(1,5),axes_class=axes_class,label_mode='each',cbar_mode='single', \
-cbar_pad = 0.05,cbar_size="15%",axes_pad=.05)
-for ii in range(5):
-    grmap[ii].set_facecolor('silver')
-    dummy = np.zeros(slcpred.shape)-9999
-    dummy[slcpred] = scale(X_pred)[:,ii]
-    im = grmap[ii].imshow(np.ma.masked_equal(dummy,-9999.),origin='upper', \
-    extent=[lon.min(),lon.max(),lat.min(),lat.max()],vmin=-2,vmax=2,cmap='RdYlBu_r')
-    grmap[ii].set_title(chr(ord('a')+ii)+') PC%i: %.1f%%' % (ii+1,pipeline.steps[1][1].explained_variance_ratio_[ii]*100),fontsize='small')
-    grmap[ii].add_feature(cfeat.LAND,facecolor='silver',zorder=-1)
-    grmap[ii].add_feature(cfeat.OCEAN,facecolor='silver',zorder=-1)
-
-cb= grmap.cbar_axes[0].colorbar(im,extend='both',ticks=[-2,-1,0,1,2],drawedges=False)
-#cb.set_label_text("Standardized PC values")
-
-#add the heatmap at the bottom using AxesGrid to make the colorbar and plots
-#fit together
-axgr=AxesGrid(fig,212,nrows_ncols=(1,1),label_mode='each',cbar_mode='single', \
+#add the heatmap at in an AxesGrid to make the colorbar and plots fit together
+axgr=AxesGrid(fig,111,nrows_ncols=(1,1),label_mode='each',cbar_mode='single', \
 cbar_pad = 0.05,cbar_size="3%",axes_pad=.55)
 
 im=axgr[0].imshow(corrmat.T,vmin=-1,vmax=1,cmap='RdYlBu_r')
 cb=axgr.cbar_axes[0].colorbar(im,ticks=[-1,-.5,0,.5,1])
 
-
-axgr[0].set_xticks(np.arange(19));axgr[0].set_xticklabels(np.arange(1,20).astype('S'))
-axgr[0].set_xlabel('Bioclimatic indicator')
-axgr[0].set_yticks(np.arange(5));axgr[0].set_yticklabels(np.arange(1,6).astype('S'))
-axgr[0].set_ylabel('Principal components')
-axgr[0].set_title("f) Pearson's correlation")
+axgr[0].set_xticks(np.arange(len(xlabs)))
+axgr[0].set_xticklabels(xlabs,rotation=90)
+axgr[0].set_xlabel('Predictor')
+axgr[0].set_yticks(np.arange(corrmat.shape[1]))
+axgr[0].set_yticklabels(np.arange(1,corrmat.shape[1]+1).astype('S'))
+axgr[0].set_ylabel('Principal component')
+cb.ax.set_title("Pearson's correlation", size = 'medium')
 
 #show / save
-fig.show()
-fig.savefig('pca_results.png',bbox_inches='tight')
+#fig.show()
+fig.savefig('figures/pca_results.png',bbox_inches='tight')

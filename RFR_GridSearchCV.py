@@ -159,6 +159,10 @@ for ff,fname in enumerate(wc2files):
             wc2mask = np.ones(dummy.shape,dtype='bool')
             wc2mask[dummy < -1.69e308] = False
 
+#get soil data mask
+sotwisfiles = glob.glob(path+'/KEN_SOTWIS/*tif');sotwisfiles.sort()
+soilmask = gdal.Open(sotwisfiles[0]).ReadAsArray()!=-9999.
+
 #defin coordinates
 y,x = wc2mask.shape
 lon = np.arange(x)*geo[1]+geo[0]+geo[1]/2.
@@ -181,16 +185,18 @@ target = np.ma.masked_equal(target,-9999.)
 #replace in case uncertainty is greater than mean value
 print 'range of target data', target.min(), target.max()
 
-slc = ~target.mask * wc2mask
+slc = ~target.mask * wc2mask * soilmask
 print '# of training pixels', slc.sum()
 
 #perform PCA bit here, limiting to n components which explain 95% of variance
 
 # extract data for final prediction here, needed for PCA
 # selection is Kenya, wc2 mask excluding water bodies (code 210)
-slcpred = kenya*wc2mask*(lc2015!=210)
-predict = np.zeros([slcpred.sum(),len(wc2subset)])
-for vv,varfile in enumerate(wc2subset):
+slcpred = kenya*wc2mask*(lc2015!=210)*soilmask
+
+predfiles = wc2subset+sotwisfiles
+predict = np.zeros([slcpred.sum(),len(predfiles)])
+for vv,varfile in enumerate(predfiles):
     predict[:,vv] = gdal.Open(varfile).ReadAsArray()[slcpred]
 
 #create a pipeline to normalize and extract EOFs
@@ -209,16 +215,15 @@ y = target.data[slc]
 if sys.argv[2] == 'new':
 
     print 'New application'
-    forest = RF(n_jobs = 20)
+    forest = RF(n_jobs = -1, oob_score=True)
 
     X_train, X_test, y_train, y_test = train_test_split(X,y,random_state=26)
 
     param_grid = {"max_features": ['auto','sqrt','log2'],
-          "min_samples_leaf": np.arange(10, 31,5),
-          "bootstrap": [True, False],
-          "n_estimators": np.arange(20,201,20)}
+          "min_samples_leaf": np.arange(21,60,10),
+          "n_estimators": np.arange(100,1001,100)}
 
-    grid = GridSearchCV(forest,param_grid=param_grid,cv=5,verbose = True)
+    grid = RandomizedSearchCV(forest,param_distributions=param_grid,cv=5,verbose = True,n_iter = 50)
 
     grid.fit(X_train,y_train)
 
@@ -239,12 +244,12 @@ if sys.argv[2] == 'new':
     #now fit final forest on all dataset
     forest.fit(X,y)
 
-    joblib.dump(forest,path+'/../saved_algorithms/kenya_ODA_v2_AGBpot_GridSearch_%s.pkl' % lvl,compress = 1)
+    joblib.dump(forest,path+'/../saved_algorithms/kenya_ODA_v2_AGBpot_%s_WC2_SOTWIS.pkl' % lvl,compress = 1)
 
 elif sys.argv[2] == 'load':
 
     print 'Loading existing application'
-    forest = joblib.load(path+'/../saved_algorithms/kenya_ODA_v2_AGBpot_%s_WorldClim2_GridSearch_%s.pkl' % lvl)
+    forest = joblib.load(path+'/../saved_algorithms/kenya_ODA_v2_AGBpot_%s_WC2_SOTWIS.pkl' % lvl)
 
 print forest.score(X,y)
 
