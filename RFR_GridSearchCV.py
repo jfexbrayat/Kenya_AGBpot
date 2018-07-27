@@ -240,7 +240,7 @@ if sys.argv[2] == 'new':
     fig.axes[0].set_title('Calibration')
     fig.axes[1].set_title('Validation')
     #fig.show()
-    fig.savefig('calval/calval_v2_%s_WorldClim2_changed_nodata_ESACCI.png' % lvl,bbox_inches='tight')
+    fig.savefig('calval/calval_v2_%s_WC2_SOTWIS_GridSearch.png' % lvl,bbox_inches='tight')
 
     #now fit final forest on all dataset
     forest.fit(X,y)
@@ -282,7 +282,7 @@ ax.set_xlabel('principal component')
 ax.set_ylabel('variable importance')
 ax.set_ylim(0,ax.get_ylim()[1])
 #figimp.show()
-figimp.savefig('calval/importances_v2_%s_threshold_WorldClim2_subset.png' % lvl,bbox_inches='tight')
+figimp.savefig('calval/importances_v2_%s_WC2_SOTWIS_GridSearch.png' % lvl,bbox_inches='tight')
 
 #save a netcdf file if needed
 if sys.argv[3] =='savenc':
