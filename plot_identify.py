@@ -52,7 +52,7 @@ co = cfeat.COASTLINE; co.scale = '110m'
 oc = cfeat.OCEAN; co.scale = '110m'
 la = cfeat.LAND;la.scale='110m'
 
-titles = ['a) Allowing crop replacement','b) Keeping current crops']
+titles = ['a) Absolute best 10%','b) Best 10% of non currently cropped']
 #create map and plot using axesgrid to nicely align map and colorbar
 figmaps = plt.figure('maps',figsize=(12,8));figmaps.clf()
 
