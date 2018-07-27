@@ -10,6 +10,7 @@ updates include using ESACCI during 1992-2015 to:
 
 '''
 
+import matplotlib;matplotlib.use('Agg')
 import glob
 from osgeo import gdal
 from sklearn.ensemble import RandomForestRegressor as RF
@@ -19,7 +20,6 @@ import pandas as pd
 from netCDF4 import Dataset
 from statsmodels.stats.outliers_influence import summary_table
 import statsmodels.api as sm
-import matplotlib;matplotlib.use('Agg')
 import pylab as pl
 import cartopy.crs as ccrs
 import cartopy.feature as cfeat
