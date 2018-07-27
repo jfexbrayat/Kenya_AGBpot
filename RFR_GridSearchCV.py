@@ -19,6 +19,7 @@ import pandas as pd
 from netCDF4 import Dataset
 from statsmodels.stats.outliers_influence import summary_table
 import statsmodels.api as sm
+import matplotlib;matplotlib.use('Agg')
 import pylab as pl
 import cartopy.crs as ccrs
 import cartopy.feature as cfeat
@@ -238,8 +239,8 @@ if sys.argv[2] == 'new':
         plot_OLS(ax,calval[1],forest.predict(calval[0]),mode='unicolor')
     fig.axes[0].set_title('Calibration')
     fig.axes[1].set_title('Validation')
-    fig.show()
-    #fig.savefig('calval/calval_v2_%s_WorldClim2_changed_nodata_ESACCI.png' % lvl,bbox_inches='tight')
+    #fig.show()
+    fig.savefig('calval/calval_v2_%s_WorldClim2_changed_nodata_ESACCI.png' % lvl,bbox_inches='tight')
 
     #now fit final forest on all dataset
     forest.fit(X,y)
@@ -268,20 +269,20 @@ print "Potential forest AGB     : %4.2f Pg C" % ((np.ma.masked_equal(potmap,-999
 figimp = pl.figure('imp');figimp.clf()
 
 ax= figimp.add_subplot(111)
-
+#sort importances
 idx = np.argsort(forest.feature_importances_)[::-1]
 imp = forest.feature_importances_[idx]
 impstd = np.std([tree.feature_importances_ for tree in forest.estimators_], axis=0)[idx]
 ax.bar(range(imp.size),imp,color='r',yerr=impstd,align='center')
 
 ax.set_xticks(range(imp.size))
-ax.set_xticklabels(np.array(wc2vars)[idx])
-ax.set_xlabel('bioclimatic indicator')
+#ax.set_xticklabels(np.array(wc2vars)[idx])
+ax.set_xlabel('principal component')
 
 ax.set_ylabel('variable importance')
 ax.set_ylim(0,ax.get_ylim()[1])
-figimp.show()
-#figimp.savefig('calval/importances_v2_%s_threshold_WorldClim2_subset.png' % lvl,bbox_inches='tight')
+#figimp.show()
+figimp.savefig('calval/importances_v2_%s_threshold_WorldClim2_subset.png' % lvl,bbox_inches='tight')
 
 #save a netcdf file if needed
 if sys.argv[3] =='savenc':
