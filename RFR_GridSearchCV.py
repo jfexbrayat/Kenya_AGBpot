@@ -252,10 +252,12 @@ elif sys.argv[2] == 'load':
     forest = joblib.load(path+'/../saved_algorithms/kenya_ODA_v2_AGBpot_%s_WC2_SOTWIS.pkl' % lvl)
 
 print(forest.score(X,y))
+print("AGB in training data: %4.2f Pg" % ((target*areas).sum()*1e-13))
 
 #create new map of potential forest biomass
 potmap = np.zeros(kenya.shape)-9999.
 potmap[slcpred] = forest.predict(X_pred)
+print("AGB in trained model: %4.2f Pg" % ((np.ma.masked_equal(potmap,-9999)*areas)[slc].sum()*1e-13))
 
 potmap[slc] = y
 potmap[~slcpred] = -9999.

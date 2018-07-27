@@ -81,5 +81,7 @@ for mm,map2plot in enumerate([obs,pot,pot-obs]):
     ax.set_yticks(np.arange(-4,5.1,2))
     ax.yaxis.set_major_formatter(LatitudeFormatter())
 
-#figmaps.show()
-figmaps.savefig('figures/compare_maps_V2_WC2_SOTWIS.png', bbox_inches='tight')
+    print(mm, (map2plot*nc_med.variables['areas'][:]).sum()*1e-13)
+
+figmaps.show()
+#figmaps.savefig('figures/compare_maps_V2_WC2_SOTWIS.png', bbox_inches='tight')

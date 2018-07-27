@@ -84,5 +84,5 @@ for ii,best10 in enumerate((absolute_best10,realistic_best10)):
     print(ii,tot)
 
 
-#figmaps.show()
-figmaps.savefig('figures/identify_V2_WC2_SOTWIS.png', bbox_inches='tight')
+figmaps.show()
+#figmaps.savefig('figures/identify_V2_WC2_SOTWIS.png', bbox_inches='tight')
