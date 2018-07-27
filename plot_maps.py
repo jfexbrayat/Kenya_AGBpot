@@ -14,10 +14,13 @@ from netCDF4 import Dataset
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 from mpl_toolkits.axes_grid1 import AxesGrid
 from cartopy.mpl.geoaxes import GeoAxes
+from osgeo import gdal
 
 import sys
 
-nc_med = Dataset('/disk/scratch/local.2/jexbraya/kenya_ODA/output/Kenya_ODA_v2_PFB_mean_WC2_SOTWIS_GridSearch.nc')
+path = '/disk/scratch/local.2/jexbraya/kenya_ODA/'
+
+nc_med = Dataset(path+'/output/Kenya_ODA_v2_PFB_mean_WC2_SOTWIS_GridSearch.nc')
 
 # load observed and potential AGB
 obs = nc_med.variables['AGB_mean'][:]
