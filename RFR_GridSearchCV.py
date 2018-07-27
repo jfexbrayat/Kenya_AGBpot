@@ -25,7 +25,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeat
 import sys
 from scipy.stats import pearsonr
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.decomposition import PCA
