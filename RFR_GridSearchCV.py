@@ -24,13 +24,11 @@ import pylab as pl
 import cartopy.crs as ccrs
 import cartopy.feature as cfeat
 import sys
-from scipy.stats import gaussian_kde,pearsonr
-from sklearn.model_selection import train_test_split, GridSearchCV, RandomizedSearchCV
-from sklearn.linear_model import Lasso, Ridge
-from sklearn.preprocessing import Normalizer, StandardScaler
+from scipy.stats import pearsonr
+from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.decomposition import PCA
-from xgboost import XGBRegressor
 
 def plot_OLS(ax,target,Y,mode='unicolor'):
 
@@ -74,7 +72,7 @@ def plot_OLS(ax,target,Y,mode='unicolor'):
     ax.set_aspect(1)
 
     ax.legend(loc='upper left')
-    ax.set_xlabel('AGB from Pedro v2 [Mg ha$^{-1}$]')
+    ax.set_xlabel('AGB from map [Mg ha$^{-1}$]')
 
     ax.set_ylabel('Reconstructed AGB [Mg ha$^{-1}$]')
 
@@ -95,7 +93,7 @@ def plot_OLS(ax,target,Y,mode='unicolor'):
     ax.set_aspect(1)
 
     ax.legend(loc='upper left')
-    ax.set_xlabel('AGB from Pedro v2 [Mg ha$^{-1}$]')
+    ax.set_xlabel('AGB from map [Mg ha$^{-1}$]')
 
     ax.set_ylabel('Reconstructed AGB [Mg ha$^{-1}$]')
 
@@ -121,16 +119,16 @@ lvl = sys.argv[1]
 if lvl in ['upper','lower']:
     uc = gdal.Open(path+'Kenya_uncertainty_2015_v2_sleek_mask_changed_nodata_30s.tif').ReadAsArray()*0.01
     if lvl == 'upper':
-        print 'setting target as mean + uc'
+        print('setting target as mean + uc')
         agbdata = agbdata+uc*agbdata
     elif lvl == 'lower':
-        print 'setting target as mean - uc'
+        print('setting target as mean - uc')
         agbdata = agbdata-uc*agbdata
 elif lvl == 'mean':
-    print 'keep target'
+    print('keep target')
 else:
     lvl = 'mean'
-    print 'no uncertainty level recognised, assuming mean'
+    print('no uncertainty level recognised, assuming mean')
 agbdata[agbdata==agbdata[0,0]] = 65535
 
 #open landcover file and extract forest and bare for 1992 and 2015
@@ -184,10 +182,10 @@ target[target==65535] = -9999.
 target = np.ma.masked_equal(target,-9999.)
 
 #replace in case uncertainty is greater than mean value
-print 'range of target data', target.min(), target.max()
+print('range of target data', target.min(), target.max())
 
 slc = ~target.mask * wc2mask * soilmask
-print '# of training pixels', slc.sum()
+print('# of training pixels', slc.sum())
 
 #perform PCA bit here, limiting to n components which explain 95% of variance
 
@@ -200,7 +198,7 @@ predict = np.zeros([slcpred.sum(),len(predfiles)])
 for vv,varfile in enumerate(predfiles):
     predict[:,vv] = gdal.Open(varfile).ReadAsArray()[slcpred]
 
-#create a pipeline to normalize and extract EOFs
+#create a pipeline to standardize and extract EOFs
 pipeline = make_pipeline(StandardScaler(),PCA(n_components=0.95))
 pipeline.fit(predict)
 
@@ -215,7 +213,7 @@ y = target.data[slc]
 
 if sys.argv[2] == 'new':
 
-    print 'New application'
+    print('New application')
     forest = RF(n_jobs = -1, oob_score=True)
 
     X_train, X_test, y_train, y_test = train_test_split(X,y,random_state=26)
@@ -228,8 +226,8 @@ if sys.argv[2] == 'new':
 
     grid.fit(X_train,y_train)
 
-    print grid.score(X_train,y_train)
-    print grid.score(X_test,y_test)
+    print(grid.score(X_train,y_train))
+    print(grid.score(X_test,y_test))
 
     forest = grid.best_estimator_
 
@@ -250,10 +248,10 @@ if sys.argv[2] == 'new':
 
 elif sys.argv[2] == 'load':
 
-    print 'Loading existing application'
+    print('Loading existing application')
     forest = joblib.load(path+'/../saved_algorithms/kenya_ODA_v2_AGBpot_%s_WC2_SOTWIS.pkl' % lvl)
 
-print forest.score(X,y)
+print(forest.score(X,y))
 
 #create new map of potential forest biomass
 potmap = np.zeros(kenya.shape)-9999.
@@ -263,8 +261,8 @@ potmap[slc] = y
 potmap[~slcpred] = -9999.
 potmap = np.ma.masked_equal(potmap,-9999.)
 
-print "Forest AGB in Pedro's map: %4.2f Pg C" % ((np.ma.masked_equal(agbdata,65535)*fraction*areas).sum()*1e-13*0.48)
-print "Potential forest AGB     : %4.2f Pg C" % ((np.ma.masked_equal(potmap,-9999.)*areas).sum()*1e-13*0.48)
+print("Forest AGB in Pedro's map: %4.2f Pg C" % ((np.ma.masked_equal(agbdata,65535)*fraction*areas).sum()*1e-13*0.48))
+print("Potential forest AGB     : %4.2f Pg C" % ((np.ma.masked_equal(potmap,-9999.)*areas).sum()*1e-13*0.48))
 
 figimp = pl.figure('imp');figimp.clf()
 
