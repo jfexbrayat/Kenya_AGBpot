@@ -109,19 +109,19 @@ def plot_OLS(ax,target,Y,mode='unicolor'):
 path = '/disk/scratch/local.2/jexbraya/kenya_ODA/processed/'
 
 #get Kenya mask
-kenya = gdal.Open(path+'/Kenya_AGB_2015_v2_sleek_mask_30arcsec.tif').ReadAsArray()!=65535
+kenya = gdal.Open(path+'/Kenya_AGB2015_v31_30s.tif').ReadAsArray()!=65535 # JFE replaced source file 10/09/2018
 #get the forest fraction within each 30s cell
-fraction = gdal.Open(path+'Kenya_sleek_mask_forest_fraction_30s.tif').ReadAsArray()
-fraction[fraction==65535] = -9999.
+#fraction = gdal.Open(path+'Kenya_sleek_mask_forest_fraction_30s.tif').ReadAsArray()
+#fraction[fraction==65535] = -9999.
 #open file with agb and get GetGeoTransform
-agbfile = gdal.Open(path+'/Kenya_AGB_2015_v2_sleek_mask_changed_nodata_30s.tif')
+agbfile = gdal.Open(path+'/Kenya_AGB2015_v31_30s.tif')
 geo = agbfile.GetGeoTransform()
 agbdata = agbfile.ReadAsArray()
 
 lvl = sys.argv[1]
 
 if lvl in ['upper','lower']:
-    uc = gdal.Open(path+'Kenya_uncertainty_2015_v2_sleek_mask_changed_nodata_30s.tif').ReadAsArray()*0.01
+    uc = gdal.Open(path+'/Kenya_AGB2015_v31_30s.tif').ReadAsArray()*0.01
     if lvl == 'upper':
         print('setting target as mean + uc')
         agbdata = agbdata+uc*agbdata
@@ -242,18 +242,18 @@ if sys.argv[2] == 'new':
     fig.axes[0].set_title('Calibration')
     fig.axes[1].set_title('Validation')
     #fig.show()
-    fig.savefig('calval/calval_v2_%s_WC2_SOTWIS_GridSearch.png' % lvl,bbox_inches='tight')
+    fig.savefig('calval/v31/calval_v31_%s_WC2_SOTWIS_GridSearch.png' % lvl,bbox_inches='tight')
 
     #now fit final forest on all dataset
     forest.fit(X,y)
 
     #save the fitted algorithm to avoid refitting everytime
-    joblib.dump(forest,path+'/../saved_algorithms/kenya_ODA_v2_AGBpot_%s_WC2_SOTWIS.pkl' % lvl,compress = 1)
+    joblib.dump(forest,path+'/../saved_algorithms/kenya_ODA_v31_AGBpot_%s_WC2_SOTWIS.pkl' % lvl,compress = 1)
 
 elif sys.argv[2] == 'load':
 
     print('Loading existing application')
-    forest = joblib.load(path+'/../saved_algorithms/kenya_ODA_v2_AGBpot_%s_WC2_SOTWIS.pkl' % lvl)
+    forest = joblib.load(path+'/../saved_algorithms/kenya_ODA_v31_AGBpot_%s_WC2_SOTWIS.pkl' % lvl)
 
 print(forest.score(X,y))
 print("AGB in training data: %4.2f Pg" % ((target*areas).sum()*1e-13))
@@ -267,8 +267,8 @@ potmap[slc] = y
 potmap[~slcpred] = -9999.
 potmap = np.ma.masked_equal(potmap,-9999.)
 
-print("Forest AGB in Pedro's map: %4.2f Pg C" % ((np.ma.masked_equal(agbdata,65535)*fraction*areas).sum()*1e-13*0.48))
-print("Potential forest AGB     : %4.2f Pg C" % ((np.ma.masked_equal(potmap,-9999.)*areas).sum()*1e-13*0.48))
+print("AGB in Pedro's map: %4.2f Pg C" % ((np.ma.masked_equal(agbdata,65535)*areas).sum()*1e-13*0.48))
+print("Potential AGB     : %4.2f Pg C" % ((np.ma.masked_equal(potmap,-9999.)*areas).sum()*1e-13*0.48))
 
 figimp = pl.figure('imp');figimp.clf()
 
@@ -292,7 +292,7 @@ figimp.savefig('calval/importances_v2_%s_WC2_SOTWIS_GridSearch.png' % lvl,bbox_i
 if sys.argv[3] =='savenc':
     import os
 
-    fname = 'Kenya_ODA_v2_PFB_%s_WC2_SOTWIS_GridSearch.nc' % lvl
+    fname = 'Kenya_ODA_v31_AGBpot_%s_WC2_SOTWIS_GridSearch.nc' % lvl
 
     if fname in os.listdir(path+'/../output/'):
         os.remove(path+'/../output/'+fname)
@@ -317,7 +317,7 @@ if sys.argv[3] =='savenc':
     nc.createVariable('AGB_%s' % lvl,'d',dimensions=('lat','lon'), zlib = True)
     nc.variables['AGB_%s' % lvl][:] = agbmap
     nc.variables['AGB_%s' % lvl].missing_value = -9999.
-    nc.variables['AGB_%s' % lvl].long_name = 'Forest AGB_%s ODA map v2 regridded to 30arcsec' % lvl
+    nc.variables['AGB_%s' % lvl].long_name = 'Forest AGB_%s ODA map v31 regridded to 30arcsec' % lvl
     nc.variables['AGB_%s' % lvl].units = 'Mg ha-1'
 
     nc.createVariable('AGBpot_%s' % lvl,'d',dimensions=('lat','lon'), zlib = True)
@@ -326,11 +326,11 @@ if sys.argv[3] =='savenc':
     nc.variables['AGBpot_%s' % lvl].units = 'Mg ha-1'
     nc.variables['AGBpot_%s' % lvl].long_name = "AGBpot_%s constructed using Kenya's ODA forest AGB_%s map v2" % (lvl,lvl)
 
-    nc.createVariable('forestfraction','d',dimensions=('lat','lon'), zlib = True)
-    nc.variables['forestfraction'][:] = fraction
-    nc.variables['forestfraction'].missing_value = -9999.
-    nc.variables['forestfraction'].units = '-'
-    nc.variables['forestfraction'].long_name = 'fraction of pixel currently forested'
+    #nc.createVariable('forestfraction','d',dimensions=('lat','lon'), zlib = True)
+    #nc.variables['forestfraction'][:] = fraction
+    #nc.variables['forestfraction'].missing_value = -9999.
+    #nc.variables['forestfraction'].units = '-'
+    #nc.variables['forestfraction'].long_name = 'fraction of pixel currently forested'
 
     nc.createVariable('training','d',dimensions=('lat','lon'), zlib = True)
     train = np.zeros(kenya.shape,dtype='i')-9999.
