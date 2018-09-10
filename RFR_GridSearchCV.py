@@ -143,9 +143,14 @@ frst1992= (lc1992>=50)*(lc1992<=90) # included code 90: mixed tree as forest - J
 lc2015  = lcfile.GetRasterBand(24).ReadAsArray()
 bare2015= (lc2015>=200)*(lc2015<=202)
 frst2015= (lc2015>=50)*(lc2015<=90)
+
 #final masks
 bare = bare1992*bare2015*kenya
 frst = frst1992*frst2015*kenya
+
+print("forests in 1992: ", (frst1992*kenya).sum()/kenya.sum() )
+print("forests in 2015: ", (frst2015*kenya).sum()/kenya.sum() )
+print("forest from 1992 to 2015", (frst*kenya).sum()/kenya.sum() )
 
 #get  climate data mask
 wc2files = glob.glob(path+'/wc2_hist/wc2*tif');wc2files.sort()
