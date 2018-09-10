@@ -27,8 +27,8 @@ pot = nc_med.variables['AGBpot_mean'][:]
 lcfile = gdal.Open(path+'/processed/ESACCI-LC-L4-LCCS-Map-1992-2015_30s.tif')
 landcover = lcfile.GetRasterBand(24).ReadAsArray()
 landcover = np.ma.array(landcover)
-crops = (landcover>=10) & (landcover <=40)
-
+crops = (landcover>=10) & (landcover <= 40)
+frst = (landcover>=50) & (landcover <= 82)
 #load legend just to have it available
 lclegend= pd.read_csv(path+'/ESACCI-LC-Legend.csv',delimiter=';')
 
@@ -80,7 +80,7 @@ for ii,best10 in enumerate((absolute_best10,realistic_best10)):
 
     ax.set_title(titles[ii])
     #get potential biomass in these best 10%
-    tot = ((pot*best10)*nc_med.variables['areas'][:]).sum()*1e-13*0.48
+    tot = ((pot*best10)*nc_med.variables['areas'][:]*(nc_med.variables['training']!=2)).sum()*1e-13*0.48
     print(ii,tot)
 
 

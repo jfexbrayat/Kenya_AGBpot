@@ -1,4 +1,8 @@
 '''
+10/09/2018 - JFE
+changed input map to be version 3.1 and adjusted land use codes from ESA-CCI to
+include 90 as forest cover
+
 24/07/2018 - JFE
 Added a PCA to reduce dimensionality
 
@@ -135,10 +139,10 @@ agbdata[agbdata==agbdata[0,0]] = 65535
 lcfile  = gdal.Open(path+'/ESACCI-LC-L4-LCCS-Map-1992-2015_30s.tif')
 lc1992  = lcfile.GetRasterBand(1).ReadAsArray()
 bare1992= (lc1992>=200)*(lc1992<=202)
-frst1992= (lc1992>=50)*(lc1992<=82)
+frst1992= (lc1992>=50)*(lc1992<=90) # included code 90: mixed tree as forest - JFE 10/09/18
 lc2015  = lcfile.GetRasterBand(24).ReadAsArray()
 bare2015= (lc2015>=200)*(lc2015<=202)
-frst2015= (lc2015>=50)*(lc2015<=82)
+frst2015= (lc2015>=50)*(lc2015<=90)
 #final masks
 bare = bare1992*bare2015*kenya
 frst = frst1992*frst2015*kenya
