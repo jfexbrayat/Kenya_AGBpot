@@ -235,7 +235,7 @@ if sys.argv[2] == 'new':
     'learning_rate': [0.001,0.01,0.1]}
 
     grid = GridSearchCV(forest,param_grid=param_grid,cv=3,verbose = True, \
-    random_state=26,scoring='neg_mean_squared_error')
+    scoring='neg_mean_squared_error')
 
     grid.fit(X_train,y_train)
 
