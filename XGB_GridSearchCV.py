@@ -43,7 +43,7 @@ def plot_OLS(ax,target,Y,mode='unicolor'):
 
     model = sm.OLS(Y,X)
 
-    results = model.fit()
+    results = model.fit()Randomiz
 
     st, data, ss2 = summary_table(results, alpha=0.05)
 
@@ -264,7 +264,7 @@ elif sys.argv[2] == 'load':
     print('Loading existing application')
     forest = joblib.load(path+'/../saved_algorithms/kenya_ODA_v31_AGBpot_%s_WC2_SOTWIS_XGB.pkl' % lvl)
 
-print(forest.score(X,y))
+print(forest.score(X,y),np.sqrt(mean_squared_error(y,forest.predict(X))))
 print("AGB in training data: %4.2f Pg" % ((target*areas).sum()*1e-13))
 
 #create new map of potential forest biomass
@@ -285,8 +285,8 @@ ax= figimp.add_subplot(111)
 #sort importances
 idx = np.argsort(forest.feature_importances_)[::-1]
 imp = forest.feature_importances_[idx]
-impstd = np.std([tree.feature_importances_ for tree in forest.estimators_], axis=0)[idx]
-ax.bar(range(imp.size),imp,color='r',yerr=impstd,align='center')
+#impstd = np.std([tree.feature_importances_ for tree in forest.estimators_], axis=0)[idx]
+ax.bar(range(imp.size),imp,color='r',align='center')
 
 ax.set_xticks(range(imp.size))
 #ax.set_xticklabels(np.array(wc2vars)[idx])

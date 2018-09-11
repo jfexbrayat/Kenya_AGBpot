@@ -29,7 +29,7 @@ import cartopy.crs as ccrs
 import cartopy.feature as cfeat
 import sys
 from scipy.stats import pearsonr
-from sklearn.model_selection import train_test_split, RandomizedSearchCV
+from sklearn.model_selection import train_test_split, GridSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.decomposition import PCA
@@ -230,9 +230,10 @@ if sys.argv[2] == 'new':
 
     param_grid = {"max_features": ['auto','sqrt','log2'],
           "min_samples_leaf": np.arange(20,60,10),
-          "n_estimators": np.arange(100,1001,100)}
+          "n_estimators": np.arange[100,200,500,1000]}
 
-    grid = RandomizedSearchCV(forest,param_distributions=param_grid,cv=5,verbose = True,n_iter = 50,scoring = 'neg_mean_squared_error')
+    grid = GridSearchCV(forest,param_grid=param_grid,cv=3,verbose = True,\
+    scoring = 'neg_mean_squared_error')
 
     grid.fit(X_train,y_train)
 
