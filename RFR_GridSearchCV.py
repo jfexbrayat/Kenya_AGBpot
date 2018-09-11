@@ -292,7 +292,7 @@ ax.set_xlabel('principal component')
 ax.set_ylabel('variable importance')
 ax.set_ylim(0,ax.get_ylim()[1])
 #figimp.show()
-figimp.savefig('calval/importances_v2_%s_WC2_SOTWIS_GridSearch.png' % lvl,bbox_inches='tight')
+figimp.savefig('calval/v31/importances_v31_%s_WC2_SOTWIS_GridSearch.png' % lvl,bbox_inches='tight')
 
 #save a netcdf file if needed
 if sys.argv[3] =='savenc':
@@ -330,7 +330,7 @@ if sys.argv[3] =='savenc':
     nc.variables['AGBpot_%s' % lvl][:] = potmap.data
     nc.variables['AGBpot_%s' % lvl].missing_value = -9999.
     nc.variables['AGBpot_%s' % lvl].units = 'Mg ha-1'
-    nc.variables['AGBpot_%s' % lvl].long_name = "AGBpot_%s constructed using Kenya's ODA forest AGB_%s map v2" % (lvl,lvl)
+    nc.variables['AGBpot_%s' % lvl].long_name = "AGBpot_%s constructed using Kenya's ODA forest AGB_%s map v31" % (lvl,lvl)
 
     #nc.createVariable('forestfraction','d',dimensions=('lat','lon'), zlib = True)
     #nc.variables['forestfraction'][:] = fraction
