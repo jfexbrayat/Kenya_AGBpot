@@ -231,7 +231,7 @@ if sys.argv[2] == 'new':
           "min_samples_leaf": np.arange(20,60,10),
           "n_estimators": np.arange(100,1001,100)}
 
-    grid = RandomizedSearchCV(forest,param_distributions=param_grid,cv=5,verbose = True,n_iter = 50)
+    grid = RandomizedSearchCV(forest,param_distributions=param_grid,cv=5,verbose = True,n_iter = 50,scoring = 'neg_mean_squared_error')
 
     grid.fit(X_train,y_train)
 
