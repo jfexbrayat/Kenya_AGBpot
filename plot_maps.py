@@ -20,11 +20,16 @@ import sys
 
 path = '/disk/scratch/local.2/jexbraya/kenya_ODA/'
 
-nc_med = Dataset(path+'/output/Kenya_ODA_v2_PFB_mean_WC2_SOTWIS_GridSearch.nc')
+nc_med = Dataset(path+'/output/Kenya_ODA_v31_AGBpot_mean_WC2_SOTWIS_GridSearch.nc')
 
 # load observed and potential AGB
 obs = nc_med.variables['AGB_mean'][:]
 pot = nc_med.variables['AGBpot_mean'][:]
+
+# JFE added forest mask to only plot forests
+frst = nc_med.variables['training'][:] == 2
+#replace places outside forests in obs as 0
+obs[~frst] = 0.
 
 #set extent and instantiate mappable items
 ext = [33.5,42.5,-5,6]
