@@ -17,7 +17,7 @@ import pandas as pd
 
 path = '/disk/scratch/local.2/jexbraya/kenya_ODA/'
 
-nc_med = Dataset(path+'/output/Kenya_ODA_v2_PFB_mean_WC2_SOTWIS_GridSearch.nc')
+nc_med = Dataset(path+'/output/Kenya_ODA_v31_AGBpot_mean_WC2_SOTWIS_GridSearch.nc')
 
 # load observed and potential AGB
 obs = nc_med.variables['AGB_mean'][:]
@@ -28,7 +28,7 @@ lcfile = gdal.Open(path+'/processed/ESACCI-LC-L4-LCCS-Map-1992-2015_30s.tif')
 landcover = lcfile.GetRasterBand(24).ReadAsArray()
 landcover = np.ma.array(landcover)
 crops = (landcover>=10) & (landcover <= 40)
-frst = (landcover>=50) & (landcover <= 82)
+frst = (landcover>=50) & (landcover <= 90)
 #load legend just to have it available
 lclegend= pd.read_csv(path+'/ESACCI-LC-Legend.csv',delimiter=';')
 
