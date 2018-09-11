@@ -225,7 +225,7 @@ y = target.data[slc]
 if sys.argv[2] == 'new':
 
     print('New application')
-    forest = RF(n_jobs = -1, oob_score=True)
+    forest = xgb.XGBRegressor(n_jobs = -1)
 
     X_train, X_test, y_train, y_test = train_test_split(X,y,random_state=26)
 
