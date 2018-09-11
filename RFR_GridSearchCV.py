@@ -33,6 +33,7 @@ from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.preprocessing import StandardScaler
 from sklearn.pipeline import make_pipeline
 from sklearn.decomposition import PCA
+from sklearn.metrics import mean_squared_error
 
 def plot_OLS(ax,target,Y,mode='unicolor'):
 
@@ -235,8 +236,8 @@ if sys.argv[2] == 'new':
 
     grid.fit(X_train,y_train)
 
-    print(grid.score(X_train,y_train))
-    print(grid.score(X_test,y_test))
+    print(grid.score(X_train,y_train),np.sqrt(mean_squared_error(y_train,grid.predict(X_train))))
+    print(grid.score(X_test,y_test),np.sqrt(mean_squared_error(y_test,grid.predict(X_test))))
 
     forest = grid.best_estimator_
 
@@ -260,7 +261,7 @@ elif sys.argv[2] == 'load':
     print('Loading existing application')
     forest = joblib.load(path+'/../saved_algorithms/kenya_ODA_v31_AGBpot_%s_WC2_SOTWIS.pkl' % lvl)
 
-print(forest.score(X,y))
+print(forest.score(X,y),np.sqrt(mean_squared_error(y,forest.predict(X))))
 print("AGB in training data: %4.2f Pg" % ((target*areas).sum()*1e-13))
 
 #create new map of potential forest biomass
