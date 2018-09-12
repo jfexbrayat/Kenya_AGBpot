@@ -122,7 +122,7 @@ agbdata = agbfile.ReadAsArray()
 lvl = sys.argv[1]
 
 if lvl in ['upper','lower']:
-    uc = gdal.Open(path+'/Kenya_AGB2015_v31_30s.tif').ReadAsArray()*0.01
+    uc = gdal.Open(path+'/Kenya_RelSTD2015_v31_30s.tif').ReadAsArray()*0.01
     if lvl == 'upper':
         print('setting target as mean + uc')
         agbdata = agbdata+uc*agbdata
