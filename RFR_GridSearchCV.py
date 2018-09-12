@@ -170,6 +170,8 @@ for ff,fname in enumerate(wc2files):
 
 #get soil data mask
 sotwisfiles = glob.glob(path+'/KEN_SOTWIS/*tif');sotwisfiles.sort()
+#get variable names
+sotwisvars = [f.split('/')[-1].split('.')[0] for f in sotwisfiles]
 soilmask = gdal.Open(sotwisfiles[0]).ReadAsArray()!=-9999.
 
 #defin coordinates
@@ -287,8 +289,8 @@ impstd = np.std([tree.feature_importances_ for tree in forest.estimators_], axis
 ax.bar(range(imp.size),imp,color='r',yerr=impstd,align='center')
 
 ax.set_xticks(range(imp.size))
-#ax.set_xticklabels(np.array(wc2vars)[idx])
-ax.set_xlabel('principal component')
+ax.set_xticklabels(np.array(wc2vars+sotwisvars)[idx],fontsize='small',rotation=90)
+ax.set_xlabel('variable')
 
 ax.set_ylabel('variable importance')
 ax.set_ylim(0,ax.get_ylim()[1])
