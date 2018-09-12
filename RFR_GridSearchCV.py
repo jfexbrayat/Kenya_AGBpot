@@ -197,8 +197,6 @@ print('range of target data', target.min(), target.max())
 slc = ~target.mask * wc2mask * soilmask
 print('# of training pixels', slc.sum())
 
-#perform PCA bit here, limiting to n components which explain 95% of variance
-
 # extract data for final prediction here, needed for PCA
 # selection is Kenya, wc2 mask excluding water bodies (code 210)
 slcpred = kenya*wc2mask*(lc2015!=210)*soilmask
@@ -209,11 +207,12 @@ for vv,varfile in enumerate(predfiles):
     predict[:,vv] = gdal.Open(varfile).ReadAsArray()[slcpred]
 
 #create a pipeline to standardize and extract EOFs
-pipeline = make_pipeline(StandardScaler(),PCA(n_components=0.95))
-pipeline.fit(predict)
+#pipeline = make_pipeline(StandardScaler(),PCA(n_components=0.95))
+#pipeline.fit(predict)
 
-X_pred = pipeline.transform(predict)
-X = X_pred[slc[slcpred]]
+#X_pred = pipeline.transform(predict)
+#X = X_pred[slc[slcpred]]
+X = predict[slc[slcpred]]
 #training = np.column_stack([training,pd.get_dummies(data['TAXNWRB'][slc]).get_values()])
 
 lat_pixels = lat2d[slc]
@@ -266,6 +265,7 @@ print(forest.score(X,y),np.sqrt(mean_squared_error(y,forest.predict(X))))
 print("AGB in training data: %4.2f Pg" % ((target*areas).sum()*1e-13))
 
 #create new map of potential forest biomass
+X_pred = predict
 potmap = np.zeros(kenya.shape)-9999.
 potmap[slcpred] = forest.predict(X_pred)
 print("AGB in trained model: %4.2f Pg" % ((np.ma.masked_equal(potmap,-9999)*areas)[slc].sum()*1e-13))

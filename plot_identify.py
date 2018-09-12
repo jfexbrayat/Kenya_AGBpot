@@ -79,8 +79,9 @@ for ii,best10 in enumerate((absolute_best10,realistic_best10)):
     ax.legend(proxy,('Optimal regions','Other'),loc='lower left')
 
     ax.set_title(titles[ii])
+
     #get potential biomass in these best 10%
-    tot = ((pot*best10)*nc_med.variables['areas'][:]*(nc_med.variables['training']!=2)).sum()*1e-13*0.48
+    tot = ((pot*best10)*nc_med.variables['areas'][:]).sum()*1e-13*0.48
     print(ii,tot)
 
 
