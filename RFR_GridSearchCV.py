@@ -199,6 +199,10 @@ print('range of target data', target.min(), target.max())
 slc = ~target.mask * wc2mask * soilmask
 print('# of training pixels', slc.sum())
 
+#adjust the frst and bare masks to match the actual selected data points
+frst[~slc] = False
+bare[~slc] = False
+
 # extract data for final prediction here, needed for PCA
 # selection is Kenya, wc2 mask excluding water bodies (code 210)
 slcpred = kenya*wc2mask*(lc2015!=210)*soilmask
@@ -228,6 +232,8 @@ if sys.argv[2] == 'new':
     forest = RF(n_jobs = -1, oob_score=True)
 
     X_train, X_test, y_train, y_test = train_test_split(X,y,random_state=26)
+
+    print(X_train.shape,X_test.shape)
 
     param_grid = {"max_features": ['auto','sqrt','log2'],
           "min_samples_leaf": np.arange(20,60,10),
