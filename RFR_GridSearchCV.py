@@ -240,8 +240,7 @@ if sys.argv[2] == 'new':
 
     param_grid = {"max_features": ['auto','sqrt','log2'],
           "min_samples_leaf": np.arange(20,60,10),
-          "n_estimators": [100,200,500,1000],
-          'max_depth': [2, 3, 4, 5, 6 , 7]}
+          "n_estimators": [100,200,500,1000]}
 
     grid = GridSearchCV(forest,param_grid=param_grid,cv=3,verbose = True,\
     scoring = 'neg_mean_squared_error')
