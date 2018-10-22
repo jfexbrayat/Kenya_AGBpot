@@ -213,12 +213,12 @@ for vv,varfile in enumerate(predfiles):
     predict[:,vv] = gdal.Open(varfile).ReadAsArray()[slcpred]
 
 #create a pipeline to standardize and extract EOFs
-#pipeline = make_pipeline(StandardScaler(),PCA(n_components=0.95))
-#pipeline.fit(predict)
+pipeline = make_pipeline(StandardScaler(),PCA(n_components=0.95))
+pipeline.fit(predict)
 
-#X_pred = pipeline.transform(predict)
-#X = X_pred[slc[slcpred]]
-X = predict[slc[slcpred]]
+X_pred = pipeline.transform(predict)
+X = X_pred[slc[slcpred]]
+#X = predict[slc[slcpred]]
 #training = np.column_stack([training,pd.get_dummies(data['TAXNWRB'][slc]).get_values()])
 
 lat_pixels = lat2d[slc]
@@ -273,7 +273,7 @@ print(forest.score(X,y),np.sqrt(mean_squared_error(y,forest.predict(X))))
 print("AGB in training data: %4.2f Pg" % ((target*areas).sum()*1e-13))
 
 #create new map of potential forest biomass
-X_pred = predict
+#X_pred = predict
 potmap = np.zeros(kenya.shape)-9999.
 potmap[slcpred] = forest.predict(X_pred)
 print("AGB in trained model: %4.2f Pg" % ((np.ma.masked_equal(potmap,-9999)*areas)[slc].sum()*1e-13))
