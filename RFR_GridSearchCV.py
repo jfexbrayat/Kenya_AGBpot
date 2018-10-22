@@ -202,10 +202,13 @@ print('# of training pixels', slc.sum())
 #adjust the frst and bare masks to match the actual selected data points
 frst[~slc] = False
 bare[~slc] = False
+print('# of forest pixels: ', frst.sum())
+print('# of bare pixels: ', bare.sum())
 
 # extract data for final prediction here, needed for PCA
 # selection is Kenya, wc2 mask excluding water bodies (code 210)
 slcpred = kenya*wc2mask*(lc2015!=210)*soilmask
+print('# of land pixels: ', slcpred.sum())
 
 predfiles = wc2subset+sotwisfiles
 predict = np.zeros([slcpred.sum(),len(predfiles)])
