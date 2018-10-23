@@ -19,11 +19,13 @@ from osgeo import gdal
 
 import sys
 
+version = sys.argv[1]
+
 path = '/disk/scratch/local.2/jexbraya/kenya_ODA/'
 
-nc_med = Dataset(path+'/output/Kenya_ODA_v31_AGBpot_mean_WC2_SOTWIS_GridSearch.nc')
-xr_upp = xr.open_dataset(path+'/output/Kenya_ODA_v31_AGBpot_upper_WC2_SOTWIS_GridSearch.nc')
-xr_low = xr.open_dataset(path+'/output/Kenya_ODA_v31_AGBpot_lower_WC2_SOTWIS_GridSearch.nc')
+nc_med = Dataset(path+'/output/Kenya_ODA_%s_AGBpot_mean_WC2_SOTWIS_GridSearch.nc' % version)
+#xr_upp = xr.open_dataset(path+'/output/Kenya_ODA_%s_AGBpot_upper_WC2_SOTWIS_GridSearch.nc' % version)
+#xr_low = xr.open_dataset(path+'/output/Kenya_ODA_%s_AGBpot_lower_WC2_SOTWIS_GridSearch.nc' % version)
 
 # load observed and potential AGB
 obs = nc_med.variables['AGB_mean'][:]
@@ -91,9 +93,9 @@ for mm,map2plot in enumerate([obs,pot,pot-obs]):
     ax.set_yticks(np.arange(-4,5.1,2))
     ax.yaxis.set_major_formatter(LatitudeFormatter())
 
-    print(mm, (map2plot*nc_med.variables['areas'][:]).sum()*1e-13)
+    print(mm, (map2plot*nc_med.variables['areas'][:]).sum()*1e-13*0.48)
 
 print('Range of AGB: %4.2f Pg C - %4.2f Pg C' % ((xr_low.AGB_lower*xr_low.areas).sum()*1e-13*0.48,(xr_upp.AGB_upper*xr_upp.areas).sum()*1e-13*0.48))
 print('Range of AGB: %4.2f Pg C - %4.2f Pg C' % ((xr_low.AGBpot_lower*xr_low.areas).sum()*1e-13*0.48,(xr_upp.AGBpot_upper*xr_upp.areas).sum()*1e-13*0.48))
 #figmaps.show()
-figmaps.savefig('figures/compare_maps_v31_WC2_SOTWIS.png', bbox_inches='tight', dpi=300)
+figmaps.savefig('figures/compare_maps_%s_WC2_SOTWIS.png' % version, bbox_inches='tight', dpi=300)
