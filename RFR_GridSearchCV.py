@@ -141,6 +141,7 @@ else:
     lvl = 'mean'
     print('no uncertainty level recognised, assuming mean')
 agbdata[agbdata==agbdata[0,0]] = 65535
+agbdata[agbdata<0] = 0
 
 #open landcover file and extract forest and bare for 1992 and 2015
 lcfile  = gdal.Open(path+'/ESACCI-LC-L4-LCCS-Map-1992-2015_30s.tif')
