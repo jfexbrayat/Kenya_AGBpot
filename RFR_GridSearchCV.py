@@ -1,4 +1,7 @@
 '''
+23/10/2018 - JFE
+the version of the dataset to be used is now a command line argument
+
 10/09/2018 - JFE
 changed input map to be version 3.1 and adjusted land use codes from ESA-CCI to
 include 90 as forest cover
@@ -109,20 +112,23 @@ def plot_OLS(ax,target,Y,mode='unicolor'):
 
 path = '/disk/scratch/local.2/jexbraya/kenya_ODA/processed/'
 
+version = sys.argv[1]
+
 #get Kenya mask
-kenya = gdal.Open(path+'/Kenya_AGB2015_v31_30s.tif').ReadAsArray()!=65535 # JFE replaced source file 10/09/2018
+kenya = gdal.Open(path+'/Kenya_AGB2015_%s_30s.tif' % version).ReadAsArray()!=65535 # JFE replaced source file 10/09/2018
 #get the forest fraction within each 30s cell
 #fraction = gdal.Open(path+'Kenya_sleek_mask_forest_fraction_30s.tif').ReadAsArray()
 #fraction[fraction==65535] = -9999.
 #open file with agb and get GetGeoTransform
-agbfile = gdal.Open(path+'/Kenya_AGB2015_v31_30s.tif')
+agbfile = gdal.Open(path+'/Kenya_AGB2015_%s_30s.tif' % version)
 geo = agbfile.GetGeoTransform()
 agbdata = agbfile.ReadAsArray()
 
-lvl = sys.argv[1]
+lvl = sys.argv[2]
+#added version
 
 if lvl in ['upper','lower']:
-    uc = gdal.Open(path+'/Kenya_RelSTD2015_v31_30s.tif').ReadAsArray()*0.01
+    uc = gdal.Open(path+'/Kenya_RelSTD2015_%s_30s.tif' % version).ReadAsArray()*0.01
     if lvl == 'upper':
         print('setting target as mean + uc')
         agbdata = agbdata+uc*agbdata
@@ -229,7 +235,7 @@ lon_pixels = lon2d[slc]
 
 y = target.data[slc]
 
-if sys.argv[2] == 'new':
+if sys.argv[3] == 'new':
 
     print('New application')
     forest = RF(n_jobs = -1, oob_score=True)
@@ -259,18 +265,18 @@ if sys.argv[2] == 'new':
     fig.axes[0].set_title('Calibration')
     fig.axes[1].set_title('Validation')
     #fig.show()
-    fig.savefig('calval/v31/calval_v31_%s_WC2_SOTWIS_GridSearch.png' % lvl,bbox_inches='tight')
+    fig.savefig('calval/%s/calval_%s_%s_WC2_SOTWIS_GridSearch.png' % (version,version,lvl),bbox_inches='tight')
 
     #now fit final forest on all dataset
     forest.fit(X,y)
 
     #save the fitted algorithm to avoid refitting everytime
-    joblib.dump(forest,path+'/../saved_algorithms/kenya_ODA_v31_AGBpot_%s_WC2_SOTWIS.pkl' % lvl,compress = 1)
+    joblib.dump(forest,path+'/../saved_algorithms/kenya_ODA_%s_AGBpot_%s_WC2_SOTWIS.pkl' % (version,lvl),compress = 1)
 
-elif sys.argv[2] == 'load':
+elif sys.argv[3] == 'load':
 
     print('Loading existing application')
-    forest = joblib.load(path+'/../saved_algorithms/kenya_ODA_v31_AGBpot_%s_WC2_SOTWIS.pkl' % lvl)
+    forest = joblib.load(path+'/../saved_algorithms/kenya_ODA_%s_AGBpot_%s_WC2_SOTWIS.pkl' % (version,lvl))
 
 print(forest.score(X,y),np.sqrt(mean_squared_error(y,forest.predict(X))))
 print("AGB in training data: %4.2f Pg" % ((target*areas).sum()*1e-13))
@@ -304,13 +310,13 @@ ax.set_xlabel('variable')
 ax.set_ylabel('variable importance')
 ax.set_ylim(0,ax.get_ylim()[1])
 #figimp.show()
-figimp.savefig('calval/v31/importances_v31_%s_WC2_SOTWIS_GridSearch.png' % lvl,bbox_inches='tight')
+figimp.savefig('calval/%s/importances_%s_%s_WC2_SOTWIS_GridSearch.png' % (version,version,lvl),bbox_inches='tight')
 
 #save a netcdf file if needed
-if sys.argv[3] =='savenc':
+if sys.argv[4] =='savenc':
     import os
 
-    fname = 'Kenya_ODA_v31_AGBpot_%s_WC2_SOTWIS_GridSearch.nc' % lvl
+    fname = 'Kenya_ODA_%s_AGBpot_%s_WC2_SOTWIS_GridSearch.nc' % (version,lvl)
 
     if fname in os.listdir(path+'/../output/'):
         os.remove(path+'/../output/'+fname)
@@ -335,14 +341,14 @@ if sys.argv[3] =='savenc':
     nc.createVariable('AGB_%s' % lvl,'d',dimensions=('lat','lon'), zlib = True)
     nc.variables['AGB_%s' % lvl][:] = agbmap
     nc.variables['AGB_%s' % lvl].missing_value = -9999.
-    nc.variables['AGB_%s' % lvl].long_name = 'Forest AGB_%s ODA map v31 regridded to 30arcsec' % lvl
+    nc.variables['AGB_%s' % lvl].long_name = 'Forest AGB_%s ODA map %s regridded to 30arcsec' % (version,lvl)
     nc.variables['AGB_%s' % lvl].units = 'Mg ha-1'
 
     nc.createVariable('AGBpot_%s' % lvl,'d',dimensions=('lat','lon'), zlib = True)
     nc.variables['AGBpot_%s' % lvl][:] = potmap.data
     nc.variables['AGBpot_%s' % lvl].missing_value = -9999.
     nc.variables['AGBpot_%s' % lvl].units = 'Mg ha-1'
-    nc.variables['AGBpot_%s' % lvl].long_name = "AGBpot_%s constructed using Kenya's ODA forest AGB_%s map v31" % (lvl,lvl)
+    nc.variables['AGBpot_%s' % lvl].long_name = "AGBpot_%s constructed using Kenya's ODA forest AGB_%s map %s" % (lvl,lvl,version)
 
     #nc.createVariable('forestfraction','d',dimensions=('lat','lon'), zlib = True)
     #nc.variables['forestfraction'][:] = fraction
