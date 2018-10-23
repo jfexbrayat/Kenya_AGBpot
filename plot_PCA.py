@@ -33,14 +33,14 @@ from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 path = '/disk/scratch/local.2/jexbraya/kenya_ODA/processed/'
 
 #get Kenya mask
-kenya = gdal.Open(path+'/Kenya_AGB_2015_v2_sleek_mask_30arcsec.tif').ReadAsArray()!=65535
+kenya = gdal.Open(path+'/Kenya_AGB2015_v31_30s.tif').ReadAsArray()!=65535
 
 #get the forest fraction within each 30s cell
-fraction = gdal.Open(path+'Kenya_sleek_mask_forest_fraction_30s.tif').ReadAsArray()
-fraction[fraction==65535] = -9999.
+#fraction = gdal.Open(path+'Kenya_sleek_mask_forest_fraction_30s.tif').ReadAsArray()
+#fraction[fraction==65535] = -9999.
 
 #open file with agb and get GetGeoTransform
-agbfile = gdal.Open(path+'/Kenya_AGB_2015_v2_sleek_mask_changed_nodata_30s.tif')
+agbfile = gdal.Open(path+'/Kenya_AGB2015_v31_30s.tif')
 geo = agbfile.GetGeoTransform()
 agbdata = agbfile.ReadAsArray()
 
@@ -73,7 +73,7 @@ lat = np.arange(y)*geo[-1]+geo[3]+geo[-1]/2.
 
 #select prediction zone
 slcpred = kenya*wc2mask*(lc2015!=210)*soilmask
-print '# total pixels', slcpred.sum()
+print('# total pixels', slcpred.sum())
 
 predfiles = wc2subset+sotwisfiles
 predict = np.zeros([slcpred.sum(),len(predfiles)])
@@ -111,10 +111,10 @@ axgr[0].set_xticks(np.arange(len(xlabs)))
 axgr[0].set_xticklabels(xlabs,rotation=90)
 axgr[0].set_xlabel('Predictor')
 axgr[0].set_yticks(np.arange(corrmat.shape[1]))
-axgr[0].set_yticklabels(np.arange(1,corrmat.shape[1]+1).astype('S'))
+axgr[0].set_yticklabels(np.arange(1,corrmat.shape[1]+1))#.astype('S'))
 axgr[0].set_ylabel('Principal component')
 cb.ax.set_title("Pearson's correlation", size = 'medium')
 
 #show / save
 #fig.show()
-fig.savefig('figures/pca_results.png',bbox_inches='tight')
+fig.savefig('figures/pca_results.png',bbox_inches='tight',dpi=300)
