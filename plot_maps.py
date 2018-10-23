@@ -62,7 +62,7 @@ cmaps = ['viridis','viridis','plasma']
 #obs.data[(obs.mask)*(~pot.mask)] = 0.
 #obs.mask[(obs.mask)*(~pot.mask)] = False
 
-titles = ['a) AGB$_{2015}$','b) AGB$_{pot}$','c) AGB$_{pot}$ - AGB$_{2015}$']
+titles = ['a) AGB','b) AGB$_{pot}$','c) AGB$_{pot}$ - AGB']
 
 #iterate maps on the grid
 for mm,map2plot in enumerate([obs,pot,pot-obs]):
@@ -95,5 +95,5 @@ for mm,map2plot in enumerate([obs,pot,pot-obs]):
 
 print('Range of AGB: %4.2f Pg C - %4.2f Pg C' % ((xr_low.AGB_lower*xr_low.areas).sum()*1e-13*0.48,(xr_upp.AGB_upper*xr_upp.areas).sum()*1e-13*0.48))
 print('Range of AGB: %4.2f Pg C - %4.2f Pg C' % ((xr_low.AGBpot_lower*xr_low.areas).sum()*1e-13*0.48,(xr_upp.AGBpot_upper*xr_upp.areas).sum()*1e-13*0.48))
-figmaps.show()
-#figmaps.savefig('figures/compare_maps_V2_WC2_SOTWIS.png', bbox_inches='tight')
+#figmaps.show()
+figmaps.savefig('figures/compare_maps_v31_WC2_SOTWIS.png', bbox_inches='tight', dpi=300)

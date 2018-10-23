@@ -64,4 +64,4 @@ ax.yaxis.set_major_formatter(LatitudeFormatter())
 
 
 plt.show()
-plt.savefig('figures/training_regions.png', bbox_inches='tight')
+plt.savefig('figures/training_regions.png', bbox_inches='tight',dpi=300)
