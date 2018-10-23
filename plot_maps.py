@@ -11,6 +11,7 @@ import os
 import cartopy.crs as ccrs
 import cartopy.feature as cfeat
 from netCDF4 import Dataset
+import xarray as xr
 from cartopy.mpl.ticker import LongitudeFormatter, LatitudeFormatter
 from mpl_toolkits.axes_grid1 import AxesGrid
 from cartopy.mpl.geoaxes import GeoAxes
@@ -21,6 +22,8 @@ import sys
 path = '/disk/scratch/local.2/jexbraya/kenya_ODA/'
 
 nc_med = Dataset(path+'/output/Kenya_ODA_v31_AGBpot_mean_WC2_SOTWIS_GridSearch.nc')
+xr_upp = xr.open_dataset(path+'/output/Kenya_ODA_v31_AGBpot_upper_WC2_SOTWIS_GridSearch.nc')
+xr_low = xr.open_dataset(path+'/output/Kenya_ODA_v31_AGBpot_lower_WC2_SOTWIS_GridSearch.nc')
 
 # load observed and potential AGB
 obs = nc_med.variables['AGB_mean'][:]
@@ -29,7 +32,7 @@ pot = nc_med.variables['AGBpot_mean'][:]
 # JFE added forest mask to only plot forests
 frst = nc_med.variables['training'][:] == 2
 #replace places outside forests in obs as 0
-obs[~frst] = 0.
+#obs[~frst] = 0.
 
 #set extent and instantiate mappable items
 ext = [33.5,42.5,-5,6]
@@ -55,9 +58,9 @@ vmn = [0,0,0]
 vmx = [200,200,100]
 cmaps = ['viridis','viridis','plasma']
 
-obs[(nc_med.variables['training'][:]==1)] = 0.
-obs.data[(obs.mask)*(~pot.mask)] = 0.
-obs.mask[(obs.mask)*(~pot.mask)] = False
+#obs[(nc_med.variables['training'][:]==1)] = 0.
+#obs.data[(obs.mask)*(~pot.mask)] = 0.
+#obs.mask[(obs.mask)*(~pot.mask)] = False
 
 titles = ['a) AGB$_{2015}$','b) AGB$_{pot}$','c) AGB$_{pot}$ - AGB$_{2015}$']
 
@@ -66,6 +69,8 @@ for mm,map2plot in enumerate([obs,pot,pot-obs]):
 
     #plot
     ax = axgr[mm]
+    #if mm == 2:
+    #    map2plot.mask[nc_med.variables['training'][:]>0] = True
     im = ax.imshow(map2plot,origin='upper',vmin = vmn[mm],vmax=vmx[mm],extent=ext,interpolation='nearest',cmap=cmaps[mm])
     #add colorbar and label on rightmost one
     cb = axgr.cbar_axes[mm].colorbar(im)
@@ -88,5 +93,7 @@ for mm,map2plot in enumerate([obs,pot,pot-obs]):
 
     print(mm, (map2plot*nc_med.variables['areas'][:]).sum()*1e-13)
 
+print('Range of AGB: %4.2f Pg C - %4.2f Pg C' % ((xr_low.AGB_lower*xr_low.areas).sum()*1e-13*0.48,(xr_upp.AGB_upper*xr_upp.areas).sum()*1e-13*0.48))
+print('Range of AGB: %4.2f Pg C - %4.2f Pg C' % ((xr_low.AGBpot_lower*xr_low.areas).sum()*1e-13*0.48,(xr_upp.AGBpot_upper*xr_upp.areas).sum()*1e-13*0.48))
 figmaps.show()
 #figmaps.savefig('figures/compare_maps_V2_WC2_SOTWIS.png', bbox_inches='tight')
