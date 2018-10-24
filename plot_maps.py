@@ -82,9 +82,9 @@ for mm,map2plot in enumerate([obs,pot,pot-obs]):
     #    map2plot.mask[nc_med.variables['training'][:]>0] = True
     im = ax.imshow(map2plot,origin='upper',vmin = vmn[mm],vmax=vmx[mm],extent=ext,interpolation='nearest',cmap=cmaps[mm])
     #add colorbar and label on rightmost one
-    cb = axgr.cbar_axes[mm].colorbar(im)
-    if mm ==2:
-        cb.set_label_text('Mg ha$^{-1}$')
+    #cb = axgr.cbar_axes[mm].
+    cb = plt.colorbar(im,cax= axgr.cbar_axes[mm],extend='max',drawedges=False)
+    axgr.cbar_axes[mm].set_title('Mg ha$^{-1}$',size='small')
     #add features: ocean and land to have map on a light grey background
     ax.add_feature(oc,facecolor='silver',zorder=-1)
     ax.add_feature(la,facecolor='silver',zorder = -1)
