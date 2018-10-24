@@ -292,8 +292,8 @@ potmap[slc] = y
 potmap[~slcpred] = -9999.
 potmap = np.ma.masked_equal(potmap,-9999.)
 
-print("AGB in Pedro's map: %4.2f Pg C" % ((np.ma.masked_equal(agbdata,65535)*areas).sum()*1e-13*0.48))
-print("Potential AGB     : %4.2f Pg C" % ((np.ma.masked_equal(potmap,-9999.)*areas).sum()*1e-13*0.48))
+print("AGB in Pedro's map: %4.2f Pg C" % ((np.ma.masked_equal(agbdata,65535)*areas*slcpred).sum()*1e-13*0.48))
+print("Potential AGB     : %4.2f Pg C" % ((np.ma.masked_equal(potmap,-9999.)*areas*slcpred).sum()*1e-13*0.48))
 
 figimp = pl.figure('imp');figimp.clf()
 
@@ -338,6 +338,7 @@ if sys.argv[4] =='savenc':
 
     agbmap = agbdata.astype('float')
     agbmap[agbmap==65535.] = -9999.
+    agbmap[~slcpred] = -9999.
 
     nc.createVariable('AGB_%s' % lvl,'d',dimensions=('lat','lon'), zlib = True)
     nc.variables['AGB_%s' % lvl][:] = agbmap
