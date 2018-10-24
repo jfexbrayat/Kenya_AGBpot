@@ -47,7 +47,7 @@ prj=ccrs.PlateCarree()
 #create map and plot using axesgrid
 ax = plt.subplot(111,projection = prj)
 
-im = ax.imshow(nc_med.variables['training'][:],origin='upper',extent=ext,interpolation='nearest')
+im = ax.imshow(nc_med.variables['training'][:],origin='upper',extent=ext,interpolation='nearest',cmap='magma')
 ax.add_feature(oc,facecolor='silver',zorder=-1)
 ax.add_feature(la,facecolor='silver',zorder = -1)
 
@@ -63,5 +63,5 @@ ax.set_yticks(np.arange(-4,5.1,2))
 ax.yaxis.set_major_formatter(LatitudeFormatter())
 
 
-plt.show()
+#plt.show()
 plt.savefig('figures/training_regions.png', bbox_inches='tight',dpi=300)
