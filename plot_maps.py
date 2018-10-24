@@ -24,17 +24,24 @@ version = sys.argv[1]
 path = '/disk/scratch/local.2/jexbraya/kenya_ODA/'
 
 nc_med = Dataset(path+'/output/Kenya_ODA_%s_AGBpot_mean_WC2_SOTWIS_GridSearch.nc' % version)
-#xr_upp = xr.open_dataset(path+'/output/Kenya_ODA_%s_AGBpot_upper_WC2_SOTWIS_GridSearch.nc' % version)
-#xr_low = xr.open_dataset(path+'/output/Kenya_ODA_%s_AGBpot_lower_WC2_SOTWIS_GridSearch.nc' % version)
+xr_upp = xr.open_dataset(path+'/output/Kenya_ODA_%s_AGBpot_upper_WC2_SOTWIS_GridSearch.nc' % version)
+xr_low = xr.open_dataset(path+'/output/Kenya_ODA_%s_AGBpot_lower_WC2_SOTWIS_GridSearch.nc' % version)
 
 # load observed and potential AGB
 obs = nc_med.variables['AGB_mean'][:]
 pot = nc_med.variables['AGBpot_mean'][:]
 
-# JFE added forest mask to only plot forests
+# JFE added forest mask to only plot forests / calculate stocks
 frst = nc_med.variables['training'][:] == 2
-#replace places outside forests in obs as 0
-#obs[~frst] = 0.
+
+#get forest cover in ESACCI
+lcfile  = gdal.Open(path+'/processed/ESACCI-LC-L4-LCCS-Map-1992-2015_30s.tif')
+lc1992  = lcfile.GetRasterBand(1).ReadAsArray()
+bare1992= (lc1992>=200)*(lc1992<=202)
+frst1992= (lc1992>=50)*(lc1992<=90) # included code 90: mixed tree as forest - JFE 10/09/18
+lc2015  = lcfile.GetRasterBand(24).ReadAsArray()
+bare2015= (lc2015>=200)*(lc2015<=202)
+frst2015= (lc2015>=50)*(lc2015<=90)
 
 #set extent and instantiate mappable items
 ext = [33.5,42.5,-5,6]
@@ -95,7 +102,7 @@ for mm,map2plot in enumerate([obs,pot,pot-obs]):
 
     print(mm, (map2plot*nc_med.variables['areas'][:]).sum()*1e-13*0.48)
 
-print('Range of AGB: %4.2f Pg C - %4.2f Pg C' % ((xr_low.AGB_lower*xr_low.areas).sum()*1e-13*0.48,(xr_upp.AGB_upper*xr_upp.areas).sum()*1e-13*0.48))
-print('Range of AGB: %4.2f Pg C - %4.2f Pg C' % ((xr_low.AGBpot_lower*xr_low.areas).sum()*1e-13*0.48,(xr_upp.AGBpot_upper*xr_upp.areas).sum()*1e-13*0.48))
+print('Range of AGB: %.1f Tg C - %.1f Tg C' % ((xr_low.AGB_lower*xr_low.areas*frst2015).sum()*1e-10*0.48,(xr_upp.AGB_upper*xr_upp.areas*frst2015).sum()*1e-10*0.48))
+print('Range of AGBpot: %.1f Tg C - %.1f Tg C' % ((xr_low.AGBpot_lower*xr_low.areas).sum()*1e-10*0.48,(xr_upp.AGBpot_upper*xr_upp.areas).sum()*1e-10*0.48))
 #figmaps.show()
 figmaps.savefig('figures/compare_maps_%s_WC2_SOTWIS.png' % version, bbox_inches='tight', dpi=300)
