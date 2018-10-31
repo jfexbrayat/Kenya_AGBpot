@@ -225,6 +225,7 @@ for vv,varfile in enumerate(predfiles):
 #create a pipeline to standardize and extract EOFs
 pipeline = make_pipeline(StandardScaler(),PCA(n_components=0.95))
 pipeline.fit(predict)
+joblib.dump(pipeline,path+'/../saved_algorithms/pca_pipeline.pkl')
 
 X_pred = pipeline.transform(predict)
 X = X_pred[slc[slcpred]]
