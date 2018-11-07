@@ -68,7 +68,7 @@ best10 = (notfrst*(pot>best10_thresh))
 best10_nocrop = (notfrst_notcrop*(pot>best10_thresh_nocrop))
 
 # now calculates budgets
-fig = plt.figure()
+fig = plt.figure('bars')
 meds = [(xr_med.AGB_mean*frst2015*xr_med.areas).sum()*.48*1e-10]
 meds.append((xr_med.AGBpot_mean*(frst2015+best10_nocrop)*xr_med.areas).sum()*.48*1e-10)
 meds.append((xr_med_rcp45.AGBpot.median(axis=0)*(frst2015+best10_nocrop)*xr_med.areas).sum()*.48*1e-10)
@@ -83,8 +83,11 @@ err = np.array(err)
 
 plt.bar(range(len(meds)),meds)
 plt.vlines(range(len(meds)),ymax=err[:,0],ymin=err[:,1])
-
+plt.xticks(range(4),['AGB$_{2015}$','AGB$_{pot}$\npresent','AGB$_{pot}$\nRCP4.5','AGB$_{pot}$\nRCP8.5'])
+plt.ylabel('Tg C')
 fig.show()
+fig.savefig('figures/rcps_v21.png',bbox_inches='tight',dpi=300)
+
 
 
 
